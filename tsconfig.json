@@ -1,0 +1,43 @@
+{
+    "include": [
+        "./Lessons/**/*.js",
+        "./Lessons/**/*.ts",
+        "./Lessons/**/*.vue",
+        "./src/**/*.ts",
+        "./src/**/*.vue",
+    ],
+    "exclude": [
+        "./Lessons/**/*.test.js",
+        "./Lessons/**/Examples/**"
+    ],
+    "compilerOptions": {
+        // Разрешает обработку `.js` файлов
+        "allowJs": true,
+        // Версия стандарта ECMAScript
+        "target": "ES2022",
+        // Модульная система, которую будет использовать собранное приложение
+        "module": "esnext",
+        // Стратегия, которая будет использоваться для импорта модулей
+        "moduleResolution": "bundler",
+        // Разрешает импорт модулей CommonJS/AMD/UMD как ES6
+        "esModuleInterop": true,
+        // Включает более строгую проверку сигнатур функций
+        "strictFunctionTypes": true,
+        // Включает режим чувствительности к регистру
+        "forceConsistentCasingInFileNames": true,
+        // Флаг проверяет, чтобы все ветки функции возвращали значение
+        "noImplicitReturns": true,
+        "lib": [
+            "DOM",
+            "ESNext"
+        ],
+        "types": [
+            "node",
+            "vite/client",
+        ],
+        // Вместо полной проверки типов, будем проверять только типы используемые в коде
+        "skipLibCheck": true,
+        "noEmit": true,
+        "incremental": true
+    },
+}

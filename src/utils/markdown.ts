@@ -1,0 +1,40 @@
+import { marked } from 'marked';
+import hljs from 'highlight.js/lib/common';
+
+const allowed = new Set('P H1 H2 H3 H4 H5 H6 UL OL LI PRE CODE BLOCKQUOTE STRONG EM DEL A IMG TABLE THEAD TBODY TR TH TD HR BR DETAILS SUMMARY INPUT'.split(' '));
+const images = import.meta.glob<string>('../../Lessons/**/*.{png,jpg,jpeg,gif,svg,webp}', { query: '?url', import: 'default' });
+
+export async function renderMarkdown(source: string, directory: string) {
+    const parsed = new DOMParser().parseFromString(await marked.parse(source), 'text/html');
+    for (const element of Array.from(parsed.body.querySelectorAll('*'))) {
+        if (!allowed.has(element.tagName)) { element.remove(); continue; }
+        const link = element.getAttribute('href');
+        const image = element.getAttribute('src');
+        const alt = element.getAttribute('alt');
+        const title = element.getAttribute('title');
+        for (const attribute of Array.from(element.attributes)) element.removeAttribute(attribute.name);
+        if (title) element.setAttribute('title', title);
+        if (element.tagName === 'INPUT') { element.setAttribute('type', 'checkbox'); element.setAttribute('disabled', ''); }
+        if (element.tagName === 'A' && link) {
+            const url = new URL(link, new URL(`../${directory}/`, location.href));
+            if (['http:', 'https:', 'mailto:'].includes(url.protocol)) {
+                element.setAttribute('href', url.href);
+                element.setAttribute('target', '_blank');
+                element.setAttribute('rel', 'noopener noreferrer');
+            }
+        }
+        if (element.tagName === 'IMG' && image) {
+            const relative = new URL(image, `https://course.invalid/${directory}/`);
+            const loader = images[`../../${decodeURIComponent(relative.pathname.slice(1))}`];
+            if (loader && relative.origin === 'https://course.invalid') element.setAttribute('src', await loader());
+            else if (/^https?:\/\//i.test(image)) element.setAttribute('src', image);
+            if (alt) element.setAttribute('alt', alt);
+            element.setAttribute('loading', 'lazy');
+        }
+    }
+    for (const code of Array.from(parsed.body.querySelectorAll('pre code'))) {
+        code.innerHTML = hljs.highlightAuto(code.textContent ?? '').value;
+    }
+    return parsed.body.innerHTML;
+}
+
