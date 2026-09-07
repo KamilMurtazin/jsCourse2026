@@ -1,40 +1,21 @@
-// "+" сложение;
+// Запуск: node "Lessons/01. Hello World. Data Types. Base Syntax/Examples/arithmetics-operations.js"
+// Сложение и короткая запись присваивания.
+let count = 10;
+count = count + 1;
+console.log(count); // 11
+count += 1;
+console.log(count); // 12
 
-// Краткий вариант сложения:
-i = i + 1;
-// То же самое, что и:
-i += 1;
+// Вычитание.
+count = count - 1;
+console.log(count); // 11
+count -= 1;
+console.log(count); // 10
 
-
-
-
-// "-" вычитание;
-
-// Краткий вариант вычитания:
-i = i - 1;
-// То же самое, что и:
-i -= 1;
-
-
-
-
-// "!" - отрицание:
-console.log(!true);
-console.log(!!1);
-console.log(!null);
-const text = '';
-console.log(!text);
-
-
-
-
-// "*" - умножение;
-// "/" - деление;
-// "**" - возведение в степень;
-
-
-
-
-// "%" - остаток от деления:
-const rest = 9 % 2;
-console.log(rest);
+console.log(7 * 2); // 14
+console.log(7 / 2); // 3.5
+console.log(3 ** 2); // 9
+console.log(9 % 2); // 1 — остаток от деления
+console.log(-9 % 2); // -1
+console.log((2 + 3) * 4); // 20
+// Логическое отрицание ! показано в logic-operations.js.

@@ -1,30 +1,32 @@
-// let
-
-function logDate() {
-    for (let i = 0; i < 10; i++) {
-        let text = 'i = ' + i;
-    }
-    console.log(text);
-}
-
-logDate();
-
-function logDate1() {
-    console.log(name);
-    let name = 'Justine';
-}
-
-logDate1();
-
-// const
-
-
+// let допускает новое присваивание; const — нет.
 const name = 'Justine';
 let surname = 'Henin';
-
-name = 'Maria';
 surname = 'Sharapova';
+console.log(name + ' ' + surname); // Justine Sharapova
 
-const letters = [ 'a', 'b', 'c' ];
+// const не запрещает изменение содержимого массива.
+const letters = ['a', 'b', 'c'];
 letters[3] = 'e';
-console.log(letters);
+console.log(letters.length); // 4
+
+// let и const имеют блочную область видимости.
+{
+    const topic = 'Переменные';
+    console.log(topic); // Переменные
+}
+
+// Намеренно ошибочные примеры ниже закомментированы.
+// Раскомментируйте ОДИН пример, запустите и объясните ошибку.
+// После необработанной ошибки оставшаяся часть выполнения останавливается.
+
+// Пример 1: повторное присваивание const.
+// name = 'Maria'; // TypeError
+
+// Пример 2: чтение имени вне блока.
+// console.log(topic); // ReferenceError
+
+// Пример 3: временная мёртвая зона (TDZ).
+// {
+//     console.log(message); // ReferenceError: до инициализации
+//     let message = 'Готово';
+// }

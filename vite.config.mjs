@@ -13,17 +13,16 @@ export default defineConfig(() => ({
     },
     build: {
         target: 'es2020',
+        // Preserve debugger statements and source locations for classroom walkthroughs.
+        minify: false,
+        sourcemap: true,
         outDir: path.resolve(import.meta.dirname, 'dist'),
         copyPublicDir: false,
         publicDir: false,
         reportCompressedSize: false,
         chunkSizeWarningLimit: Number.POSITIVE_INFINITY,
         rolldownOptions: {
-            input: [
-                './src/index.html',
-                './src/runner.html',
-                ...taskHtml,
-            ],
+            input: ['./src/index.html', './src/runner.html', ...taskHtml],
             output: {
                 entryFileNames: '[name].bundle.js',
                 chunkFileNames: 'chunks/[name].[hash].js',
@@ -42,7 +41,13 @@ export default defineConfig(() => ({
                 order: 'pre',
                 handler(_html, context) {
                     if (context.filename.replaceAll('\\', '/').includes('/Lessons/')) {
-                        return [{ tag: 'script', attrs: { type: 'module', src: '/src/runner/bridge.ts' }, injectTo: 'head-prepend' }];
+                        return [
+                            {
+                                tag: 'script',
+                                attrs: { type: 'module', src: '/src/runner/bridge.ts' },
+                                injectTo: 'head-prepend',
+                            },
+                        ];
                     }
                     return [];
                 },

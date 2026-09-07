@@ -1,19 +1,16 @@
-var name;
-
+// Исторический синтаксис: var имеет область функции, но не блока for.
 function logDate() {
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 10; i += 1) {
         var text = 'i = ' + i;
     }
-    console.log(text);
+    console.log(text); // i = 9
 }
-
 logDate();
 
-function logDate1() {
-    console.log(text);
-    for (var i = 0; i < 10; i++) {
-        var text = 'i = ' + i;
-    }
+// Объявление var учитывается заранее; присваивание остаётся на своём месте.
+function logBeforeAssignment() {
+    console.log(text); // undefined
+    var text = 'Готово';
+    console.log(text); // Готово
 }
-
-logDate1();
+logBeforeAssignment();

@@ -1,4 +1,4 @@
-const sinon = require('sinon');
+import { vi } from 'vitest';
 import itisCool from './index';
 
 describe('01.c.1 itisCool', () => {
@@ -22,41 +22,40 @@ describe('01.c.1 itisCool', () => {
     let spy;
 
     beforeEach(() => {
-        spy = sinon.spy(console, 'log');
+        spy = vi.spyOn(console, 'log').mockImplementation(() => {});
     });
 
     afterEach(() => {
-        spy.restore();
+        spy.mockRestore();
     });
 
     it('01.c.1.1 range: 1 - 35', () => {
         itisCool(1, 35);
-        const expected = range.slice(0, 35).join('\n');
-        const actual = spy.args.join('\n');
-        expect(actual).toBe(expected);
+        expect(spy.mock.calls).toEqual(range.slice(0, 35).map(value => [value]));
     });
 
     it('01.c.1.2 range: 41 - 60', () => {
         itisCool(41, 60);
-        const expected = range.slice(40, 60).join('\n');
-        const actual = spy.args.join('\n');
-        expect(actual).toBe(expected);
+        expect(spy.mock.calls).toEqual(range.slice(40, 60).map(value => [value]));
     });
 
     it('01.c.1.3 range: 77 - 97', () => {
         itisCool(77, 97);
-        const expected = range.slice(76, 97).join('\n');
-        const actual = spy.args.join('\n');
-        expect(actual).toBe(expected);
+        expect(spy.mock.calls).toEqual(range.slice(76, 97).map(value => [value]));
     });
 
     it('01.c.1.4 one element', () => {
         itisCool(45, 45);
-        expect(spy.withArgs('ItisCool').calledOnce).toBe(true);
+        expect(spy.mock.calls).toEqual([['ItisCool']]);
     });
 
     it('01.c.1.5 console.log not called', () => {
         itisCool(35, 25);
-        expect(spy.notCalled).toBe(true);
+        expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('01.c.1.6 prints an ordinary number as number', () => {
+        itisCool(2, 2);
+        expect(spy.mock.calls).toEqual([[2]]);
     });
 });
