@@ -1078,3 +1078,24 @@ input[aria-invalid='true'] {
         scroll-behavior: auto !important;
     }
 }
+/* Browser drafts share the source panel with the existing line walkthrough. */
+.source-modes, .save-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.source-modes { margin-left: auto; }
+.file-strip .draft-badge { color: #8a5a08; font-weight: 650; margin-left: auto; white-space: nowrap; }
+.editor-guide { padding: 10px 16px; font-size: 11px; color: #5d6d85; border-bottom: 1px solid var(--border); background: #fafbfe; }
+.editor-guide span { padding: 0 5px; color: #9aa8be; }
+.draft-editor { display: grid; grid-template-columns: 45px minmax(0, 1fr); height: 300px; background: #fff; }
+.editor-gutter { overflow: hidden; background: #fafbfe; border-right: 1px solid #edf0f5; color: #8b96a8; text-align: right; user-select: none; }
+.editor-gutter pre { margin: 0; padding: 14px 10px 14px 0; font: 13px/22px 'Cascadia Code', Consolas, monospace; }
+#source-editor { border: 0; border-radius: 0; width: 100%; height: 100%; resize: none; padding: 14px 12px; font: 13px/22px 'Cascadia Code', Consolas, monospace; tab-size: 4; white-space: pre; overflow: auto; }
+#source-editor:focus-visible { outline: 2px solid #6889ed; outline-offset: -2px; }
+.editor-save-area { padding: 13px 16px; border-top: 1px solid var(--border); background: #fafbfe; }
+.editor-save-area code { overflow-wrap: anywhere; }
+.saved-label { color: #297b5e; font-size: 10px; }
+.editor-message { margin: 8px 0 0; color: #297b5e; font-size: 12px; }
+.conflict-notice { padding: 12px; margin-top: 10px; background: #fff5e5; border: 1px solid #e9cd9a; border-radius: 6px; color: #805218; font-size: 12px; }
+.conflict-notice button { display: block; margin-top: 8px; }
+.outdated-result { padding: 10px 16px; margin: 0; background: #fff9ec; border-bottom: 1px solid #f0dfb4; font-size: 11px; color: #805c17; }
+.is-presenting #source-editor, .is-presenting .editor-gutter pre { font-size: 17px; line-height: 28px; }
+.is-presenting .draft-editor { height: 380px; }
+@media (max-width: 700px) { .source-panel > .panel-heading { flex-wrap: wrap; } .editor-guide { font-size: 10px; } }

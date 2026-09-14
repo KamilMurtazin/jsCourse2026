@@ -3,6 +3,7 @@ import vuePlugin from '@vitejs/plugin-vue';
 import path from 'path';
 import { checker } from 'vite-plugin-checker';
 import { globSync } from 'node:fs';
+import courseEditor from './src/server/courseEditor.ts';
 
 const taskHtml = globSync('Lessons/*/{Tasks,Homework}/**/index.html');
 
@@ -35,6 +36,7 @@ export default defineConfig(() => ({
     },
     base: './',
     plugins: [
+        courseEditor(),
         {
             name: 'course-task-console',
             transformIndexHtml: {

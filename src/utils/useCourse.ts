@@ -5,6 +5,7 @@ import { getLessonsOptions, getTasksMap } from './getSelectorOptions';
 import { parseArguments, requiresNode } from './execution';
 import { renderMarkdown } from './markdown';
 import { readStorage, writeStorage } from './storage';
+import { useTaskEditor } from './useTaskEditor';
 import type { LogEntry, RunStatus } from '../types';
 
 export function useCourse() {
@@ -15,6 +16,7 @@ export function useCourse() {
     const query = ref('');
     const group = ref('all');
     const source = ref('');
+    const editor = useTaskEditor(source);
     const description = ref('');
     const lessonDescription = ref('');
     const loading = ref(false);
@@ -55,6 +57,7 @@ export function useCourse() {
     let logId = 0;
     let runInput = '';
     let runDebug = false;
+    let runModuleUrl = '';
     let ignoreInputSave = false;
     const storageKey = () => `course:args:${task.value?.path ?? ''}`;
     const noteKey = () => `course:note:${filePath.value}:${activeLine.value}`;
@@ -129,15 +132,36 @@ export function useCourse() {
         duration.value = null;
         const current = revision;
         const launch = launchRevision;
+        const runSource = source.value;
+        const useDraft = editor.dirty.value;
         await nextTick(); // Destroy the old browsing context, including its timers and Vue app.
         if (current !== revision || launch !== launchRevision) {
             return;
         }
+        runModuleUrl = '';
+        if (useDraft) {
+            status.value = 'loading';
+            try {
+                const moduleUrl = await editor.draftUrl(runSource);
+                if (current !== revision || launch !== launchRevision) {
+                    return;
+                }
+                runModuleUrl = moduleUrl;
+            } catch (error) {
+                if (current !== revision || launch !== launchRevision) {
+                    return;
+                }
+                status.value = 'error';
+                addLog('error', error instanceof Error ? error.message : 'Не удалось запустить черновик.');
+                return;
+            }
+        }
+        editor.ranSource.value = runSource;
         runId.value = crypto.randomUUID();
         runInput = input.value;
         runDebug = debug;
         const url = selected.type === 'html'
-            ? new URL(`../${selected.path}`, location.href)
+            ? new URL(runModuleUrl || `../${selected.path}`, location.href)
             : new URL('./runner.html', location.href);
         url.searchParams.set('run', runId.value);
         frameUrl.value = url.href;
@@ -150,6 +174,7 @@ export function useCourse() {
         revision += 1;
         const current = revision;
         stop(false);
+        editor.clear();
         logs.value = [];
         source.value = '';
         description.value = '';
@@ -189,6 +214,10 @@ export function useCourse() {
                     throw results[0].reason;
                 }
                 source.value = results[0].value;
+                await editor.load(selected.path, results[0].value);
+                if (current !== revision) {
+                    return;
+                }
                 const raw = results[1].status === 'fulfilled' ? results[1].value : '';
                 const html = await renderMarkdown(
                     raw || 'Условие пока не добавлено. Откройте README.md в папке задачи.',
@@ -284,6 +313,7 @@ export function useCourse() {
                     path: task.value?.path,
                     input: runInput,
                     debug: runDebug,
+                    moduleUrl: runModuleUrl,
                 },
                 location.origin,
             );
@@ -402,6 +432,7 @@ export function useCourse() {
         group,
         filteredTasks,
         source,
+        editor,
         description,
         lessonDescription,
         loading,

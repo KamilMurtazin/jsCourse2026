@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, watch } from 'vue';
+import {
+    computed, nextTick, ref, watch,
+} from 'vue';
 import hljs from 'highlight.js/lib/common';
 import { useCourse } from '../utils/useCourse';
 
@@ -12,6 +14,8 @@ const {
     query,
     group,
     filteredTasks,
+    source,
+    editor,
     description,
     lessonDescription,
     loading,
@@ -48,6 +52,25 @@ const {
     saveNote,
     copy,
 } = useCourse();
+const {
+    available: editorAvailable,
+    editing: editorEditing,
+    saving: editorSaving,
+    dirty: editorDirty,
+    error: editorError,
+    message: editorMessage,
+    conflict: editorConflict,
+    resultOutdated,
+    save: saveFile,
+    reset: resetDraft,
+} = editor;
+const editorScroll = ref(0);
+watch([filePath, editorEditing], () => {
+    editorScroll.value = 0;
+});
+watch(lineCount, (count) => {
+    activeLine.value = Math.min(activeLine.value, count);
+});
 const statusText = computed(
     () => ({
         idle: 'Выберите задачу',
@@ -66,8 +89,12 @@ const highlightedLines = computed(() => lines.value.map(
         ignoreIllegals: true,
     }).value || ' ',
 ));
-const domTask = computed(() => tasks.value.find(item => task.value?.type === 'js'
-    && item.directory === task.value.directory && item.type === 'html' && !item.id.endsWith('Example')));
+const domTask = computed(() => tasks.value.find(
+    (item) => task.value?.type === 'js'
+            && item.directory === task.value.directory
+            && item.type === 'html'
+            && !item.id.endsWith('Example'),
+));
 const copyLink = () => copy(window.location.href);
 watch(activeLine, async () => {
     if (!walkthrough.value) {
@@ -85,7 +112,12 @@ watch(activeLine, async () => {
     <div class="course" :class="{ 'is-presenting': presentation }">
         <a class="skip-link" href="#workspace">К заданию</a>
         <header class="topbar">
-            <a class="brand" href="./index.html" aria-label="Frontend практикум, главная" @click.prevent="chooseLesson('')">
+            <a
+                class="brand"
+                href="./index.html"
+                aria-label="Frontend практикум, главная"
+                @click.prevent="chooseLesson('')"
+            >
                 <span class="brand-icon" aria-hidden="true">&lt;/&gt;</span>
                 <span>frontend<span class="brand-dot">.</span> <small>практикум</small></span>
             </a>
@@ -146,8 +178,8 @@ watch(activeLine, async () => {
                 </p>
             </template>
             <div class="sidebar-footer">
-                <span class="local-dot"></span> Решения — в вашем редакторе<br /><small
-                    >Сохраните файл, чтобы увидеть изменения.</small
+                <span class="local-dot"></span> Код — здесь или в редакторе<br /><small
+                    >Запускайте черновик. Затем сохраняйте изменения в файл.</small
                 >
             </div>
         </aside>
@@ -278,20 +310,65 @@ watch(activeLine, async () => {
                         <section class="panel source-panel">
                             <div class="panel-heading">
                                 <h2><span class="section-number">02</span> Ваш код</h2>
-                                <button
-                                    class="button small"
-                                    :aria-pressed="walkthrough"
-                                    @click="walkthrough = !walkthrough"
-                                >
-                                    {{ walkthrough ? 'Закончить разбор' : 'Разбор по строкам' }}
-                                </button>
+                                <div class="source-modes">
+                                    <button
+                                        v-if="editorAvailable"
+                                        class="button small"
+                                        :aria-pressed="editorEditing"
+                                        @click="
+                                            editorEditing = true;
+                                            walkthrough = false;
+                                        "
+                                    >
+                                        Редактировать
+                                    </button>
+                                    <button
+                                        class="button small"
+                                        :aria-pressed="walkthrough"
+                                        @click="
+                                            editorEditing = false;
+                                            walkthrough = !walkthrough;
+                                        "
+                                    >
+                                        {{ walkthrough ? 'Закончить разбор' : 'Разбор по строкам' }}
+                                    </button>
+                                </div>
                             </div>
                             <div class="file-strip">
                                 <span aria-hidden="true">≡</span
                                 ><code :title="filePath">{{ filePath.split('/').slice(-2).join('/') }}</code
+                                ><span v-if="editorDirty" class="draft-badge">● Черновик</span
                                 ><span>{{ lineCount }} строк</span>
                             </div>
+                            <template v-if="editorAvailable">
+                                <div class="editor-guide">
+                                    1. Измените код <span>→</span> 2. Запустите черновик <span>→</span> 3.
+                                    Сохраните в файл
+                                </div>
+                                <div v-if="editorEditing" class="draft-editor">
+                                    <div class="editor-gutter" aria-hidden="true">
+                                        <pre :style="{ transform: `translateY(-${editorScroll}px)` }">{{
+                                            lines.map((_, index) => index + 1).join('\n')
+                                        }}</pre>
+                                    </div>
+                                    <label for="source-editor" class="visually-hidden">Код задачи</label>
+                                    <textarea
+                                        id="source-editor"
+                                        v-model="source"
+                                        :key="filePath"
+                                        spellcheck="false"
+                                        autocapitalize="off"
+                                        autocomplete="off"
+                                        wrap="off"
+                                        aria-describedby="editor-help"
+                                        @scroll="
+                                            editorScroll = ($event.target as HTMLTextAreaElement).scrollTop
+                                        "
+                                    ></textarea>
+                                </div>
+                            </template>
                             <div
+                                v-if="!editorEditing || !editorAvailable"
                                 class="code-scroll"
                                 :class="{ 'has-walkthrough': walkthrough }"
                                 aria-label="Исходный код"
@@ -313,7 +390,7 @@ watch(activeLine, async () => {
                                     ><code v-html="line"></code>
                                 </button>
                             </div>
-                            <div v-if="walkthrough" class="walkthrough">
+                            <div v-if="walkthrough && !editorEditing" class="walkthrough">
                                 <div class="walkthrough-toolbar">
                                     <strong
                                         >Строка {{ activeLine }}
@@ -398,7 +475,13 @@ watch(activeLine, async () => {
                                     </p>
                                     <div class="run-actions">
                                         <button class="button primary" type="submit">
-                                            ▶ {{ status === 'running' ? 'Перезапустить' : 'Запустить'
+                                            ▶
+                                            {{
+                                                editorDirty
+                                                    ? 'Запустить черновик'
+                                                    : status === 'running'
+                                                      ? 'Перезапустить'
+                                                      : 'Запустить'
                                             }}<kbd>Ctrl ↵</kbd>
                                         </button>
                                         <button v-if="frameUrl" class="button" type="button" @click="stop()">
@@ -429,9 +512,55 @@ watch(activeLine, async () => {
                                     </details>
                                 </template>
                             </form>
+                            <div class="editor-save-area">
+                                <template v-if="editorAvailable">
+                                    <div class="save-actions">
+                                        <button
+                                            class="button"
+                                            :disabled="!editorDirty || editorSaving || editorConflict"
+                                            @click="saveFile"
+                                        >
+                                            {{ editorSaving ? 'Сохраняем…' : 'Сохранить в файл' }}
+                                        </button>
+                                        <button
+                                            class="text-button"
+                                            :disabled="editorSaving"
+                                            @click="resetDraft"
+                                        >
+                                            Загрузить файл с диска
+                                        </button>
+                                        <span v-if="!editorDirty" class="saved-label"
+                                            >Совпадает с файлом</span
+                                        >
+                                    </div>
+                                    <p id="editor-help" class="microcopy muted">
+                                        Запуск проверяет код без записи на диск. «Сохранить в файл» обновит
+                                        <code>{{ filePath }}</code
+                                        >.
+                                    </p>
+                                </template>
+                                <p v-else class="microcopy muted">
+                                    Для редактирования и записи файлов откройте приложение через localhost с
+                                    командой <code>yarn watch</code>.
+                                </p>
+                                <p v-if="editorMessage" class="editor-message" role="status">
+                                    {{ editorMessage }}
+                                </p>
+                                <p v-if="editorError" class="field-error" role="alert">{{ editorError }}</p>
+                                <div v-if="editorConflict" class="conflict-notice" role="alert">
+                                    Файл изменён снаружи. Скопируйте свой код, затем загрузите версию с диска
+                                    и перенесите нужные правки.
+                                    <button class="text-button" @click="copy(source)">
+                                        Скопировать мой код
+                                    </button>
+                                </div>
+                            </div>
                         </section>
 
                         <section class="panel console-panel">
+                            <p v-if="resultOutdated" class="outdated-result" role="status">
+                                Код изменён после запуска. Запустите его снова, чтобы обновить результат.
+                            </p>
                             <div class="panel-heading">
                                 <h2><span class="section-number">03</span> Консоль</h2>
                                 <button class="text-button" :disabled="!logs.length" @click="logs = []">

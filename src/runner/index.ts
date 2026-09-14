@@ -23,15 +23,24 @@ window.addEventListener('message', async (event) => {
         return;
     }
     started = true;
-    const { path, input, debug } = event.data as {
+    const {
+        path, input, debug, moduleUrl,
+    } = event.data as {
         path: string;
         input: string;
         debug: boolean;
+        moduleUrl?: string;
     };
     const key = `../../${path}`;
     try {
+        const draft = import.meta.env.DEV
+            && moduleUrl
+            && moduleUrl.startsWith('/Lessons/')
+            && moduleUrl.includes('/.course-draft-')
+            ? moduleUrl
+            : '';
         if (Object.hasOwn(components, key)) {
-            const module = await components[key]();
+            const module = draft ? await import(/* @vite-ignore */ draft) : await components[key]();
             const app = createApp(module.default);
             app.use(createPinia());
             app.config.errorHandler = (error) => send('failure', {
@@ -40,7 +49,7 @@ window.addEventListener('message', async (event) => {
             app.mount('#task-root');
             send('complete');
         } else if (Object.hasOwn(scripts, key)) {
-            const module = await scripts[key]();
+            const module = draft ? await import(/* @vite-ignore */ draft) : await scripts[key]();
             const args = parseArguments(
                 input,
                 module.payload
