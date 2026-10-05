@@ -1,12 +1,18 @@
 import CarBrand from './carBrand';
 
 class LadaBrand extends CarBrand {
-    // Начало
-    constructor() {
-        super();
+    constructor(model, power, acceleration, location) {
+        super(model, power, acceleration);
+        this.location = location;
     }
 
-    // Конец
+    brandName() {
+        return 'Lada';
+    }
+
+    getLocation() {
+        return `Lada ${this.model} is located in ${this.location}`;
+    }
 }
 
 export default LadaBrand;
