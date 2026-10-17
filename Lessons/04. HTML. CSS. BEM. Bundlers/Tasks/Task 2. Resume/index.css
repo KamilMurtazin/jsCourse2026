@@ -1,7 +1,114 @@
+body {
+    font-family: Tahoma, sans-serif;
+    background: #eef1f5;
+    padding: 20px;
+    margin: 0;
+    color: #333;
+}
+
+p {
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 8px 0;
+}
+
+
 .resume {
-    padding: 10px;
-    margin: 20px;
-    font-family: Verdana, Tahoma, sans-serif;
-    background: #ffeed6;
-    border-radius: 10px;
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 32px 48px;
+    border-radius: 8px;
+    border: 1px solid #dcdcdc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+
+.resume__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.resume__header-info-section {
+    flex-grow: 1;
+}
+
+.resume__header-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.resume__header-info-section h2 {
+    font-size: 18px;
+    font-weight: 400;
+    color: #666;
+    margin: 0 0 12px 0;
+}
+
+.resume__header-link {
+    font-size: 15px;
+    color: #2a6df4;
+    text-decoration: none;
+    margin-right: 16px;
+}
+
+.resume__header-link:hover {
+    text-decoration: underline;
+}
+
+.resume__header-image-section img {
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+
+.resume__main-section {
+    margin-bottom: 24px;
+}
+
+.resume__main-header {
+    font-size: 20px;
+    font-weight: 600;
+    border-bottom: 1px solid #d0d0d0;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+}
+
+.resume__main-skills,
+.resume__main-education {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.resume__main-skills li {
+    font-size: 16px;
+    padding: 4px 0 4px 20px;
+    position: relative;
+}
+
+.resume__main-skills li::before {
+    content: '•';
+    color: #2a6df4;
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+.resume__footer {
+    text-align: center;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 16px;
+    color: #555;
+}
+
+.resume__footer-item {
+    font-size: 15px;
+    margin-top: 6px;
 }
